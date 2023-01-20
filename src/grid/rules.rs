@@ -89,8 +89,8 @@ impl Rules {
         RULES[self.rule].flags[state as usize][count]
     }
 
-    pub fn name(&self) -> String {
-        RULES[self.rule].name.to_string()
+    pub fn name(&self) -> &str {
+        RULES[self.rule].name
     }
     
     pub fn prev_rule(&mut self) {
