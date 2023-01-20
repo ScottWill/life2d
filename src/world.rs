@@ -75,6 +75,15 @@ impl Model {
         self.grid.step();
     }
 
+    pub fn title(&self) -> String {
+        let rule = self.grid.rules.name();
+        let running = match self.stepping {
+            true  => "Running",
+            false => "Paused",
+        };
+        format!("2D Life - {rule} - {running}")
+    }
+
     pub fn view(&self, app: &App, draw: &Draw) {
         let img = self.grid.render();
         let view = Texture::from_image(app, &img);
