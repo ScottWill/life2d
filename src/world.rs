@@ -1,6 +1,9 @@
 use crate::grid::grid::Grid;
 use nannou::{Draw, App, wgpu::{Texture, SamplerDescriptor, FilterMode}, prelude::{WindowEvent::{KeyPressed, MouseMoved, MousePressed, MouseReleased}, Key, Vec2, MouseButton}};
 
+const PAUSED: &'static str = "Paused";
+const RUNNING: &'static str = "Running";
+
 pub struct Model {
     grid: Grid,
     mouse_pos: Option<Vec2>,
@@ -27,6 +30,7 @@ impl Model {
             KeyPressed(key) => match key {
                 Key::C      => self.grid.preset_cross(),
                 Key::G      => self.grid.preset_grid(),
+                Key::I      => self.grid.invert(),
                 Key::O      => self.grid.toggle_overlay(),
                 Key::R      => self.grid.randomize(),
                 Key::X      => self.grid.preset_eks(),
@@ -78,8 +82,8 @@ impl Model {
     pub fn title(&self) -> String {
         let rule = self.grid.rules.name();
         let running = match self.stepping {
-            true  => "Running",
-            false => "Paused",
+            true  => RUNNING,
+            false => PAUSED,
         };
         format!("2D Life - {rule} - {running}")
     }

@@ -43,6 +43,12 @@ impl Grid {
                 self.set_state(p, state, sym);
             });
     }
+
+    pub fn invert(&mut self) {
+        let cells = &mut self.cells[self.cell_ref as usize];
+        cells.par_iter_mut()
+            .for_each(|c| *c = !*c);
+    }
     
     pub fn randomize(&mut self) {
         let dist = Bernoulli::from_ratio(1, RAND_DENOM).unwrap();
