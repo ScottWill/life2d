@@ -16,20 +16,23 @@ fn main() {
 }
 
 fn model(app: &App) -> Model {
+    let model = Model::new(WIDTH, HEIGHT, SCALE);
     app.new_window()
         .event(event_fn)
         .resizable(false)
+        .title(model.title())
         .size(WIDTH, HEIGHT)
         .build()
         .unwrap();
-    Model::new(WIDTH, HEIGHT, SCALE)
+    model
 }
 
 fn event_fn(app: &App, model: &mut Model, event: nannou::event::WindowEvent) {
     model.handle_event(app, event);
 }
 
-fn update(_: &App, model: &mut Model, _: Update) {
+fn update(app: &App, model: &mut Model, _: Update) {
+    app.main_window().set_title(&model.title());
     model.step();
 }
 
