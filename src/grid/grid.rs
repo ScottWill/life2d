@@ -156,18 +156,13 @@ fn count(cells: &Vec<bool>, x: u32, y: u32, w: u32, h: u32) -> usize {
     cells[ix![xp, yp, w]] as usize
 }
 
-fn mirror_pos(pos: (i32, i32), h: i32, w: i32, sym: bool) -> Vec<usize> {
-    let (x, y) = pos;
+fn mirror_pos((x, y): (i32, i32), h: i32, w: i32, sym: bool) -> Vec<usize> {
     if sym {
-        let hw = w / 2;
-        let hh = h / 2;
-        let xm = x - hw;
-        let ym = y - hh;
         vec![
-            ix![hw - xm, hh - ym, w],
-            ix![hw - xm, hh + ym, w],
-            ix![hw + xm, hh - ym, w],
-            ix![hw + xm, hh + ym, w],
+            ix![w - x, h - y, w],
+            ix![w - x, y, w],
+            ix![x, h - y, w],
+            ix![x, y, w],
         ]
 
     } else {
