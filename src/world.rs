@@ -5,6 +5,7 @@ const PAUSED: &'static str = "Paused";
 const RUNNING: &'static str = "Running";
 
 pub struct Model {
+    pub debug: bool,
     grid: Grid,
     mouse_pos: Option<Vec2>,
     scale: f32,
@@ -14,12 +15,15 @@ pub struct Model {
 
 impl Model {
 
-    pub fn new(width: u32, height: u32, scale: u32) -> Self {
+    pub fn new(width: u32, height: u32, scale: u32, debug: bool) -> Self {
+        assert!(height % scale == 0, "`scale` must be a divisor of `height`");
+        assert!(width % scale == 0, "`scale` must be a divisor of `width`");
         let dims = (width / scale, height / scale);
         let mut grid = Grid::new(dims.0, dims.1);
         grid.randomize();
         Model {
             grid,
+            debug,
             dims,
             mouse_pos: None,
             scale: scale as f32,
