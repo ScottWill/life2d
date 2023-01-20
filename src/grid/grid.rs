@@ -94,10 +94,11 @@ impl Grid {
     }
     
     fn set_state(&mut self, pos: (i32, i32), state: bool, sym: bool) {
-        let pos = (pos.0 as u32, pos.1 as u32);
         let cells = &mut self.cells[self.cell_ref as usize];
-        for i in mirror_pos(pos, self.height, self.width, sym) {
-            cells[i] = state;
+        for i in mirror_pos(pos, self.height as i32, self.width as i32, sym) {
+            if i < cells.len() {
+                cells[i] = state;
+            }
         }
     }
 
@@ -143,34 +144,39 @@ fn count(cells: &Vec<bool>, x: u32, y: u32, w: u32, h: u32) -> usize {
     let yn = (h + y - 1) % h;
     let yp = (y + 1) % h;
 
-    cells[ix(xn, yn, w)] as usize +
-    cells[ix(x, yn, w)] as usize +
-    cells[ix(xp, yn, w)] as usize +
-    cells[ix(xn, y, w)] as usize +
-    cells[ix(xp, y, w)] as usize +
-    cells[ix(xn, yp, w)] as usize +
-    cells[ix(x, yp, w)] as usize +
-    cells[ix(xp, yp, w)] as usize
+    cells[uix(xn, yn, w)] as usize +
+    cells[uix(x, yn, w)] as usize +
+    cells[uix(xp, yn, w)] as usize +
+    cells[uix(xn, y, w)] as usize +
+    cells[uix(xp, y, w)] as usize +
+    cells[uix(xn, yp, w)] as usize +
+    cells[uix(x, yp, w)] as usize +
+    cells[uix(xp, yp, w)] as usize
 }
 
-fn mirror_pos(pos: (u32, u32), h: u32, w: u32, sym: bool) -> Vec<usize> {
+fn mirror_pos(pos: (i32, i32), h: i32, w: i32, sym: bool) -> Vec<usize> {
+    let (x, y) = pos;
     if sym {
         let hw = w / 2;
         let hh = h / 2;
-        let (lx, rx) = (pos.0.min((pos.0 + hw) % w), pos.0.max((pos.0 + hw) % w));
-        let (ly, ry) = (pos.1.min((pos.1 + hh) % h), pos.1.max((pos.1 + hh) % h));
         vec![
-            ix(lx, ly, w),
-            ix(lx, ry, w),
-            ix(rx, ly, w),
-            ix(rx, ry, w),
+            iix(hw - (x - hw), hh - (y - hh), w),
+            iix(hw - (x - hw), hh + (y - hh), w),
+            iix(hw + (x - hw), hh - (y - hh), w),
+            iix(hw + (x - hw), hh + (y - hh), w),
         ]
+
     } else {
-        vec![ix(pos.0 as u32, pos.1 as u32, w)]
+        vec![iix(x, y, w)]
     }
 }
 
 #[inline(always)]
-fn ix(x: u32, y: u32, w: u32) -> usize {
+fn iix(x: i32, y: i32, w: i32) -> usize {
+    (y * w + x) as usize
+}
+
+#[inline(always)]
+fn uix(x: u32, y: u32, w: u32) -> usize {
     (y * w + x) as usize
 }
