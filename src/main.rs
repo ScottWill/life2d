@@ -39,12 +39,9 @@ fn main() {
 
 fn model(app: &App) -> Model {
     let args = Args::parse();
-    let mut model = Model::new(args.width, args.height, args.scale, args.debug);
-    let meta = model.title_meta();
     let mut builder = app.new_window()
         .event(event_fn)
-        .resizable(false)
-        .title(title!(meta));
+        .resizable(false);
 
     builder = if args.fullscreen {
         builder.fullscreen()
@@ -53,11 +50,8 @@ fn model(app: &App) -> Model {
     };
         
     let id = builder.build().unwrap();
-    if args.fullscreen {
-        let rect = app.window(id).unwrap().rect();
-        model = Model::new(rect.w() as u32, rect.h() as u32, args.scale, args.debug);
-    }
-    model
+    let rect = app.window(id).unwrap().rect();
+    Model::new(rect.w() as u32, rect.h() as u32, args.scale, args.debug)
 }
 
 fn event_fn(app: &App, model: &mut Model, event: WindowEvent) {
@@ -66,8 +60,7 @@ fn event_fn(app: &App, model: &mut Model, event: WindowEvent) {
 
 fn update(app: &App, model: &mut Model, _: Update) {
     let now = Instant::now();
-    let meta = model.title_meta();
-    app.main_window().set_title(&title!(meta));
+    app.main_window().set_title(&title!(model.title_meta()));
     model.step();
     if model.debug {
         println!("update: {:?}", now.elapsed());
@@ -87,6 +80,9 @@ fn view(app: &App, model: &Model, frame: Frame) {
 #[macro_export]
 macro_rules! title {
     ($x:expr) => {
-        format!("{APP_NAME} - {} - {}", $x.0, $x.1)
+        {
+            let (a, b) = $x;
+            format!("{APP_NAME} - {} - {}", a, b)
+        }
     }
 }
