@@ -1,5 +1,5 @@
 use crate::world::Model;
-use nannou::{App, Frame, prelude::Update};
+use nannou::{App, Frame, prelude::Update, event::WindowEvent};
 
 mod grid;
 mod world;
@@ -29,7 +29,7 @@ fn model(app: &App) -> Model {
     model
 }
 
-fn event_fn(app: &App, model: &mut Model, event: nannou::event::WindowEvent) {
+fn event_fn(app: &App, model: &mut Model, event: WindowEvent) {
     model.handle_event(app, event);
 }
 
