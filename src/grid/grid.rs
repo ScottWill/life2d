@@ -61,7 +61,6 @@ impl Grid {
     }
     
     pub fn preset_grid(&mut self) {
-        let width = self.width;
         let cells = &mut self.cells[self.cell_ref as usize];
         cells.par_iter_mut()
             .enumerate()
@@ -72,7 +71,6 @@ impl Grid {
     }
     
     pub fn preset_cross(&mut self) {
-        let width = self.width;
         let w = self.width / 2;
         let h = self.height / 2;
         let cells = &mut self.cells[self.cell_ref as usize];
