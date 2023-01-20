@@ -147,27 +147,27 @@ fn count(cells: &Vec<bool>, x: u32, y: u32, w: u32, h: u32) -> usize {
     let yn = (h + y - 1) % h;
     let yp = (y + 1) % h;
 
-    cells[ix![xn, yn, w]] as usize +
-    cells[ix![x, yn, w]] as usize +
-    cells[ix![xp, yn, w]] as usize +
-    cells[ix![xn, y, w]] as usize +
-    cells[ix![xp, y, w]] as usize +
-    cells[ix![xn, yp, w]] as usize +
-    cells[ix![x, yp, w]] as usize +
-    cells[ix![xp, yp, w]] as usize
+    cells[ix!(xn, yn, w)] as usize +
+    cells[ix!(x, yn, w)] as usize +
+    cells[ix!(xp, yn, w)] as usize +
+    cells[ix!(xn, y, w)] as usize +
+    cells[ix!(xp, y, w)] as usize +
+    cells[ix!(xn, yp, w)] as usize +
+    cells[ix!(x, yp, w)] as usize +
+    cells[ix!(xp, yp, w)] as usize
 }
 
 fn mirror_pos((x, y): (i32, i32), h: i32, w: i32, sym: bool) -> Vec<usize> {
     if sym {
         vec![
-            ix![w - x, h - y, w],
-            ix![w - x, y, w],
-            ix![x, h - y, w],
-            ix![x, y, w],
+            ix!(w - x, h - y, w),
+            ix!(w - x, y, w),
+            ix!(x, h - y, w),
+            ix!(x, y, w),
         ]
 
     } else {
-        vec![ix![x, y, w]]
+        vec![ix!(x, y, w)]
     }
 }
 
