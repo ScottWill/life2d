@@ -88,6 +88,10 @@ impl Rules {
     pub fn eval(&self, state: bool, count: usize) -> bool {
         RULES[self.rule].flags[state as usize][count]
     }
+
+    pub fn name(&self) -> String {
+        RULES[self.rule].name.to_string()
+    }
     
     pub fn prev_rule(&mut self) {
         self.set_rule(RULES.len() + self.rule - 1);
