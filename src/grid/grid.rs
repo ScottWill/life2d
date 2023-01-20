@@ -130,10 +130,13 @@ impl Grid {
 
     pub fn render(&self, dims: usize) -> Vec<u8> {
         let cells: &Vec<bool> = &self.cells[self.cell_ref as usize];
-        (0..cells.len() * dims)
+        let size = cells.len() * dims;
+        let mut buf = Vec::with_capacity(size);
+        (0..size)
             .into_par_iter()
             .map(|i| !cells[i / dims] as u8 * 255)
-            .collect()
+            .collect_into_vec(&mut buf);
+        buf
     }
 
 }
