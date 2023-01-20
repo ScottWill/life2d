@@ -38,11 +38,11 @@ fn main() {
 }
 
 fn model(app: &App) -> Model {
-    let args = Args::parse();
     let mut builder = app.new_window()
         .event(event_fn)
         .resizable(false);
-
+    
+    let args = Args::parse();
     builder = if args.fullscreen {
         builder.fullscreen()
     } else {
