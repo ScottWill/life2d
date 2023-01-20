@@ -107,7 +107,6 @@ impl Rules {
 
     fn set_rule(&mut self, value: usize) {
         self.rule = value % RULES.len();
-        println!("switched to rule: {}", self.name());
     }
     
 }
