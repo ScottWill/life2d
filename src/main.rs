@@ -18,10 +18,11 @@ fn main() {
 
 fn model(app: &App) -> Model {
     let model = Model::new(WIDTH, HEIGHT, SCALE);
+    let meta = model.title_meta();
     app.new_window()
         .event(event_fn)
         .resizable(false)
-        .title(title!(model.title_meta()))
+        .title(title!(meta))
         .size(WIDTH, HEIGHT)
         .build()
         .unwrap();
@@ -33,7 +34,8 @@ fn event_fn(app: &App, model: &mut Model, event: nannou::event::WindowEvent) {
 }
 
 fn update(app: &App, model: &mut Model, _: Update) {
-    app.main_window().set_title(&title!(model.title_meta()));
+    let meta = model.title_meta();
+    app.main_window().set_title(&title!(meta));
     model.step();
 }
 
