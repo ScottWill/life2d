@@ -4,9 +4,17 @@ use nannou::{App, Frame, prelude::Update};
 mod grid;
 mod world;
 
+const APP_NAME: &'static str = "2D Life";
 const HEIGHT: u32 = 900;
 const WIDTH: u32 = 1200;
 const SCALE: u32 = 2; // should be evenly divisible between both width and height
+
+#[macro_export]
+macro_rules! title {
+    ($x:expr) => {
+        format!("{APP_NAME} - {} - {}", $x.0, $x.1)
+    }
+}
 
 fn main() {
     nannou::app(model)
@@ -20,7 +28,7 @@ fn model(app: &App) -> Model {
     app.new_window()
         .event(event_fn)
         .resizable(false)
-        .title(model.title())
+        .title(title!(model.title_meta()))
         .size(WIDTH, HEIGHT)
         .build()
         .unwrap();
@@ -32,7 +40,7 @@ fn event_fn(app: &App, model: &mut Model, event: nannou::event::WindowEvent) {
 }
 
 fn update(app: &App, model: &mut Model, _: Update) {
-    app.main_window().set_title(&model.title());
+    app.main_window().set_title(&title!(model.title_meta()));
     model.step();
 }
 

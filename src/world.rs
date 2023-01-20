@@ -79,13 +79,13 @@ impl Model {
         self.grid.step();
     }
 
-    pub fn title(&self) -> String {
+    pub fn title_meta(&self) -> (&str, &str) {
         let rule = self.grid.rules.name();
         let running = match self.stepping {
             true  => RUNNING,
             false => PAUSED,
         };
-        format!("2D Life - {rule} - {running}")
+        (rule, running)
     }
 
     pub fn view(&self, app: &App, draw: &Draw) {
