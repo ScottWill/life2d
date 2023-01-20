@@ -7,10 +7,11 @@ const RUNNING: &'static str = "Running";
 pub struct Model {
     pub debug: bool,
     grid: Grid,
-    mouse_pos: Option<Vec2>,
-    scale: f32,
+    mouse_pos: Option<IVec2>,
+    scale: u32,
     dims: (u32, u32),
     stepping: bool,
+    offset: IVec2,
 }
 
 impl Model {
@@ -22,12 +23,13 @@ impl Model {
         let mut grid = Grid::new(dims.0, dims.1);
         grid.randomize();
         Model {
-            grid,
+            offset: IVec2::new(width as i32, height as i32) / 2,
+            mouse_pos: None,
+            stepping: true,
             debug,
             dims,
-            mouse_pos: None,
-            scale: scale as f32,
-            stepping: true,
+            grid,
+            scale,
         }
     }
 
@@ -48,30 +50,40 @@ impl Model {
                 Key::Space  => self.toggle_stepping(),
                 _ => ()
             },
-            MouseMoved(pos1) => if let Some(pos0) = self.mouse_pos {
-                let pos1 = ny(pos1);
-                let offset = {
-                    let rect = app.window_rect();
-                    Vec2::new(rect.w() * 0.5, rect.h() * 0.5)
-                };
-                self.grid.draw_line(
-                    v2t((pos0 + offset) / self.scale),
-                    v2t((pos1 + offset) / self.scale),
-                    true,
-                    app.keys.down.contains(&Key::LShift)
-                );
-                self.mouse_pos = Some(pos1);
+            MouseMoved(end) => if let Some(start) = self.mouse_pos {
+                if !app.keys.down.contains(&Key::LControl) {
+                    let end = end.as_i32();
+                    let sym = app.keys.down.contains(&Key::LShift);
+                    self.draw_line(start, end, self.offset, sym);
+                    self.mouse_pos = Some(end);
+                }
             },
             MousePressed(button) => match button {
-                MouseButton::Left => self.mouse_pos = Some(ny(app.mouse.position())),
+                MouseButton::Left => self.mouse_pos = Some(app.mouse.position().as_i32()),
                 _ => ()
             },
             MouseReleased(button) => match button {
-                MouseButton::Left => self.mouse_pos = None,
+                MouseButton::Left => if let Some(start) = self.mouse_pos {
+                    if app.keys.down.contains(&Key::LControl) {
+                        let end = app.mouse.position().as_i32();
+                        let sym = app.keys.down.contains(&Key::LShift);
+                        self.draw_line(start, end, self.offset, sym);
+                    }
+                    self.mouse_pos = None;
+                },
                 _ => ()
             },
             _ => (),
         };
+    }
+
+    fn draw_line(&mut self, start: IVec2, end: IVec2, offset: IVec2, sym: bool) {
+        self.grid.draw_line(
+            v2t((ny(start) + offset) / self.scale as i32),
+            v2t((ny(end) + offset) / self.scale as i32),
+            true,
+            sym
+        );
     }
 
     pub fn step(&mut self) {
@@ -99,7 +111,7 @@ impl Model {
         let view = Texture::from_image(app, &DynamicImage::ImageRgb8(buf));
         let mut desc = SamplerDescriptor::default();
         desc.mag_filter = FilterMode::Nearest;
-        draw.scale(self.scale)
+        draw.scale(self.scale as f32)
             .sampler(desc)
             .texture(&view);
     }
@@ -111,11 +123,11 @@ impl Model {
 }
 
 #[inline(always)]
-fn ny(v: Vec2) -> Vec2 {
-    Vec2::new(v.x, -v.y)
+fn ny(v: IVec2) -> IVec2 {
+    IVec2::new(v.x, -v.y)
 }
 
 #[inline(always)]
-fn v2t(v: Vec2) -> (i32, i32) {
-    (v.x as i32, v.y as i32)
+fn v2t(v: IVec2) -> (i32, i32) {
+    (v.x, v.y)
 }
