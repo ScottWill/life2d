@@ -1,3 +1,4 @@
+use crate::{ix, xy};
 use line_drawing::Bresenham;
 use nannou::{image::{ImageBuffer, DynamicImage}, rand::{distributions::Bernoulli, prelude::Distribution, self}};
 use rayon::prelude::{IntoParallelRefIterator, IndexedParallelIterator, ParallelIterator, IntoParallelRefMutIterator, IntoParallelIterator};
@@ -65,8 +66,7 @@ impl Grid {
         cells.par_iter_mut()
             .enumerate()
             .for_each(|(i, c)| {
-                let x = i as u32 % width;
-                let y = i as u32 / width;
+                let (x, y) = xy![i as u32, self.width];
                 *c = (*c && self.overlay) || (x % 3 != 0 && y % 3 != 0);
             });
     }
@@ -79,8 +79,7 @@ impl Grid {
         cells.par_iter_mut()
             .enumerate()
             .for_each(|(i, c)| {
-                let x = i as u32 % width;
-                let y = i as u32 / width;
+                let (x, y) = xy![i as u32, self.width];
                 *c = (*c && self.overlay) || x == w || y == h;
             });
     }
@@ -93,8 +92,7 @@ impl Grid {
         cells.par_iter_mut()
             .enumerate()
             .for_each(|(i, c)| {
-                let x = i as u32 % width;
-                let y = i as u32 / width;
+                let (x, y) = xy![i as u32, self.width];
                 *c = (*c && self.overlay) || x - w == y || x - w == height - y;
             });
     }
@@ -126,7 +124,7 @@ impl Grid {
             .par_iter()
             .enumerate()
             .map(|(i, c)| {
-                let (x, y) = (i as u32 % self.width, i as u32 / self.width);
+                let (x, y) = xy![i as u32, self.width];
                 self.rules.eval(*c, count(&old_cells, x, y, self.width, self.height))
             })
             .collect_into_vec(new_cells);
@@ -150,14 +148,14 @@ fn count(cells: &Vec<bool>, x: u32, y: u32, w: u32, h: u32) -> usize {
     let yn = (h + y - 1) % h;
     let yp = (y + 1) % h;
 
-    cells[uix(xn, yn, w)] as usize +
-    cells[uix(x, yn, w)] as usize +
-    cells[uix(xp, yn, w)] as usize +
-    cells[uix(xn, y, w)] as usize +
-    cells[uix(xp, y, w)] as usize +
-    cells[uix(xn, yp, w)] as usize +
-    cells[uix(x, yp, w)] as usize +
-    cells[uix(xp, yp, w)] as usize
+    cells[ix![xn, yn, w]] as usize +
+    cells[ix![x, yn, w]] as usize +
+    cells[ix![xp, yn, w]] as usize +
+    cells[ix![xn, y, w]] as usize +
+    cells[ix![xp, y, w]] as usize +
+    cells[ix![xn, yp, w]] as usize +
+    cells[ix![x, yp, w]] as usize +
+    cells[ix![xp, yp, w]] as usize
 }
 
 fn mirror_pos(pos: (i32, i32), h: i32, w: i32, sym: bool) -> Vec<usize> {
@@ -165,24 +163,30 @@ fn mirror_pos(pos: (i32, i32), h: i32, w: i32, sym: bool) -> Vec<usize> {
     if sym {
         let hw = w / 2;
         let hh = h / 2;
+        let xm = x - hw;
+        let ym = y - hh;
         vec![
-            iix(hw - (x - hw), hh - (y - hh), w),
-            iix(hw - (x - hw), hh + (y - hh), w),
-            iix(hw + (x - hw), hh - (y - hh), w),
-            iix(hw + (x - hw), hh + (y - hh), w),
+            ix![hw - xm, hh - ym, w],
+            ix![hw - xm, hh + ym, w],
+            ix![hw + xm, hh - ym, w],
+            ix![hw + xm, hh + ym, w],
         ]
 
     } else {
-        vec![iix(x, y, w)]
+        vec![ix![x, y, w]]
     }
 }
 
-#[inline(always)]
-fn iix(x: i32, y: i32, w: i32) -> usize {
-    (y * w + x) as usize
+#[macro_export]
+macro_rules! ix {
+    ( $x:expr, $y:expr, $w:expr ) => {
+        ($y * $w + $x) as usize
+    }
 }
 
-#[inline(always)]
-fn uix(x: u32, y: u32, w: u32) -> usize {
-    (y * w + x) as usize
+#[macro_export]
+macro_rules! xy {
+    ( $x:expr, $w:expr ) => {
+        ($x % $w, $x / $w)
+    }
 }

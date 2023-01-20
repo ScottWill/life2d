@@ -9,13 +9,6 @@ const HEIGHT: u32 = 900;
 const WIDTH: u32 = 1200;
 const SCALE: u32 = 2; // should be evenly divisible between both width and height
 
-#[macro_export]
-macro_rules! title {
-    ($x:expr) => {
-        format!("{APP_NAME} - {} - {}", $x.0, $x.1)
-    }
-}
-
 fn main() {
     nannou::app(model)
         .update(update)
@@ -48,4 +41,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
     model.view(app, &draw);
     draw.to_frame(app, &frame).unwrap();
+}
+
+#[macro_export]
+macro_rules! title {
+    ($x:expr) => {
+        format!("{APP_NAME} - {} - {}", $x.0, $x.1)
+    }
 }
