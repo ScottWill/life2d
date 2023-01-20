@@ -918,6 +918,7 @@ version = "0.1.0"
 dependencies = [
  "line_drawing",
  "nannou",
+ "rand 0.8.5",
  "rayon",
 ]
 
