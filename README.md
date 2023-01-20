@@ -13,3 +13,4 @@
   - X: draw an X
   - G: draw a grid
   - C: draw a cross
+  - I: invert state
