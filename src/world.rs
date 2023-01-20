@@ -1,5 +1,5 @@
 use crate::grid::grid::Grid;
-use nannou::{Draw, App, wgpu::{Texture, SamplerDescriptor, FilterMode}, prelude::{WindowEvent::{KeyPressed, MouseMoved, MousePressed, MouseReleased}, Key, Vec2, MouseButton}};
+use nannou::{prelude::*, wgpu::*, image::*};
 
 const PAUSED: &'static str = "Paused";
 const RUNNING: &'static str = "Running";
@@ -8,17 +8,19 @@ pub struct Model {
     grid: Grid,
     mouse_pos: Option<Vec2>,
     scale: f32,
+    dims: (u32, u32),
     stepping: bool,
 }
 
 impl Model {
 
     pub fn new(width: u32, height: u32, scale: u32) -> Self {
-        let (width, height) = (width / scale, height / scale);
-        let mut grid = Grid::new(width, height);
+        let dims = (width / scale, height / scale);
+        let mut grid = Grid::new(dims.0, dims.1);
         grid.randomize();
         Model {
             grid,
+            dims,
             mouse_pos: None,
             scale: scale as f32,
             stepping: true,
@@ -89,8 +91,8 @@ impl Model {
     }
 
     pub fn view(&self, app: &App, draw: &Draw) {
-        let img = self.grid.render();
-        let view = Texture::from_image(app, &img);
+        let buf = ImageBuffer::from_raw(self.dims.0, self.dims.1, self.grid.render(3)).unwrap();
+        let view = Texture::from_image(app, &DynamicImage::ImageRgb8(buf));
         let mut desc = SamplerDescriptor::default();
         desc.mag_filter = FilterMode::Nearest;
         draw.scale(self.scale)

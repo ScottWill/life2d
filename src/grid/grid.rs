@@ -1,10 +1,9 @@
 use crate::{ix, xy};
 use line_drawing::Bresenham;
-use nannou::{image::{ImageBuffer, DynamicImage}, rand::{distributions::Bernoulli, prelude::Distribution, self}};
-use rayon::prelude::{IntoParallelRefIterator, IndexedParallelIterator, ParallelIterator, IntoParallelRefMutIterator, IntoParallelIterator};
+use rand::{distributions::Bernoulli, prelude::Distribution};
+use rayon::prelude::*;
 use super::rules::Rules;
 
-const DIM: usize = 3;
 const RAND_DENOM: u32 = 6;
 
 pub struct Grid {
@@ -129,13 +128,12 @@ impl Grid {
         
     }
 
-    pub fn render(&self) -> DynamicImage {
+    pub fn render(&self, dims: usize) -> Vec<u8> {
         let cells: &Vec<bool> = &self.cells[self.cell_ref as usize];
-        let buf = (0..cells.len() * DIM)
+        (0..cells.len() * dims)
             .into_par_iter()
-            .map(|i| !cells[i / DIM] as u8 * 255)
-            .collect();
-        DynamicImage::ImageRgb8(ImageBuffer::from_raw(self.width, self.height, buf).unwrap())
+            .map(|i| !cells[i / dims] as u8 * 255)
+            .collect()
     }
 
 }
