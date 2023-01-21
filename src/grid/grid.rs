@@ -21,12 +21,12 @@ impl Grid {
         let size = (width * height) as usize;
         let cells = vec![false; size];
         Self {
-            rules: Rules::default(),
             cell_ref: false,
             cells: [cells.clone(), cells],
+            overlay: false,
+            rules: Rules::default(),
             height,
             width,
-            overlay: false,
         }
     }
 
@@ -148,12 +148,12 @@ fn count(cells: &Vec<bool>, x: u32, y: u32, w: u32, h: u32) -> usize {
     let yp = (y + 1) % h;
 
     cells[ix!(xn, yn, w)] as usize +
-    cells[ix!(x, yn, w)] as usize +
+    cells[ix!( x, yn, w)] as usize +
     cells[ix!(xp, yn, w)] as usize +
-    cells[ix!(xn, y, w)] as usize +
-    cells[ix!(xp, y, w)] as usize +
+    cells[ix!(xn,  y, w)] as usize +
+    cells[ix!(xp,  y, w)] as usize +
     cells[ix!(xn, yp, w)] as usize +
-    cells[ix!(x, yp, w)] as usize +
+    cells[ix!( x, yp, w)] as usize +
     cells[ix!(xp, yp, w)] as usize
 }
 
