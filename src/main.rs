@@ -11,7 +11,7 @@ const APP_NAME: &'static str = "2D Life";
 
 /// 2D Life simulation
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None, disable_help_flag(true))]
 struct Args {
     /// Output debug information
     #[arg(short, long, default_value_t = false)]

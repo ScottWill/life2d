@@ -1,4 +1,5 @@
 use crate::grid::grid::Grid;
+use line_drawing::Bresenham;
 use nannou::{prelude::*, wgpu::*, image::*};
 
 const PAUSED: &'static str = "Paused";
@@ -6,6 +7,7 @@ const RUNNING: &'static str = "Running";
 
 pub struct Model {
     pub debug: bool,
+    drawing_line: bool,
     grid: Grid,
     mouse_pos: Option<IVec2>,
     scale: u32,
@@ -23,6 +25,7 @@ impl Model {
         let mut grid = Grid::new(dims.0, dims.1);
         grid.randomize();
         Model {
+            drawing_line: false,
             offset: IVec2::new(width as i32, height as i32) / 2,
             mouse_pos: None,
             stepping: true,
@@ -51,7 +54,7 @@ impl Model {
                 _ => ()
             },
             MouseMoved(end) => if let Some(start) = self.mouse_pos {
-                if !app.keys.down.contains(&Key::LControl) {
+                if !self.drawing_line {
                     let end = end.as_i32();
                     let sym = app.keys.down.contains(&Key::LShift);
                     self.draw_line(start, end, self.offset, sym);
@@ -59,16 +62,18 @@ impl Model {
                 }
             },
             MousePressed(button) => match button {
-                MouseButton::Left => self.mouse_pos = Some(app.mouse.position().as_i32()),
+                MouseButton::Left => {
+                    self.drawing_line = app.keys.down.contains(&Key::LControl);
+                    self.mouse_pos = Some(app.mouse.position().as_i32())
+                },
                 _ => ()
             },
             MouseReleased(button) => match button {
                 MouseButton::Left => if let Some(start) = self.mouse_pos {
-                    if app.keys.down.contains(&Key::LControl) {
-                        let end = app.mouse.position().as_i32();
-                        let sym = app.keys.down.contains(&Key::LShift);
-                        self.draw_line(start, end, self.offset, sym);
-                    }
+                    let end = app.mouse.position().as_i32();
+                    let sym = app.keys.down.contains(&Key::LShift);
+                    self.draw_line(start, end, self.offset, sym);
+                    self.drawing_line = false;
                     self.mouse_pos = None;
                 },
                 _ => ()
@@ -78,12 +83,11 @@ impl Model {
     }
 
     fn draw_line(&mut self, start: IVec2, end: IVec2, offset: IVec2, sym: bool) {
-        self.grid.draw_line(
-            v2t((ny(start) + offset) / self.scale as i32),
-            v2t((ny(end) + offset) / self.scale as i32),
-            true,
-            sym
-        );
+        let start = v2t((ny(start) + offset) / self.scale as i32);
+        let end = v2t((ny(end) + offset) / self.scale as i32);
+        let points = Bresenham::new(start, end)
+            .collect::<Vec<(i32,i32)>>();
+        self.grid.set_states(points, true, sym);
     }
 
     pub fn step(&mut self) {
@@ -114,6 +118,17 @@ impl Model {
         draw.scale(self.scale as f32)
             .sampler(desc)
             .texture(&view);
+            
+        if let Some(start) = self.mouse_pos {
+            let start = start.as_f32();
+            let end = app.mouse.position();
+            if self.drawing_line && start != end {
+                draw.line()
+                    .color(BLACK)
+                    .points(start, end)
+                    .weight(1.0);
+            }
+        }
     }
 
     fn toggle_stepping(&mut self) {

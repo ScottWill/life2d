@@ -1,5 +1,4 @@
 use crate::{ix, xy};
-use line_drawing::Bresenham;
 use rand::{distributions::Bernoulli, prelude::Distribution};
 use rayon::prelude::*;
 use super::rules::Rules;
@@ -33,15 +32,6 @@ impl Grid {
     pub fn clear(&mut self) {
         let cells = &mut self.cells[self.cell_ref as usize];
         cells.par_iter_mut().for_each(|c| *c = false);
-    }
-
-    pub fn draw_line(&mut self, start: (i32, i32), end: (i32, i32), state: bool, sym: bool) {
-        Bresenham::new(start, end)
-            .collect::<Vec<(i32,i32)>>()
-            .into_iter()
-            .for_each(|p| {
-                self.set_state(p, state, sym);
-            });
     }
 
     pub fn invert(&mut self) {
@@ -92,6 +82,12 @@ impl Grid {
                 let (x, y) = xy![i as u32, self.width];
                 *c = (*c && self.overlay) || x - w == y || x - w == height - y;
             });
+    }
+
+    pub fn set_states(&mut self, points: Vec<(i32,i32)>, state: bool, sym: bool) {
+        for pos in points {
+            self.set_state(pos, state, sym);
+        }
     }
     
     fn set_state(&mut self, pos: (i32, i32), state: bool, sym: bool) {
