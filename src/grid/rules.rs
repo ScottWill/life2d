@@ -102,7 +102,7 @@ impl Rules {
     }
     
     pub fn reset_rules(&mut self) {
-        self.set_rule(0);
+        self.rule = 0;
     }
 
     fn set_rule(&mut self, value: usize) {

@@ -41,34 +41,35 @@ impl Model {
                 Key::I      => self.grid.invert(),
                 Key::O      => self.grid.toggle_overlay(),
                 Key::R      => self.grid.randomize(),
+                Key::S      => self.snapshot(app.main_window().elapsed_frames()),
                 Key::X      => self.grid.preset_eks(),
                 Key::Back   => self.grid.clear(),
                 Key::Comma  => self.grid.rules.prev_rule(),
                 Key::Return => self.step_once(),
                 Key::Period => self.grid.rules.next_rule(),
                 Key::Slash  => self.grid.rules.reset_rules(),
-                Key::Space  => self.toggle_stepping(),
+                Key::Space  => self.stepping = !self.stepping,
                 _ => ()
             },
             MouseMoved(end) => if let Some(start) = self.mouse_pos {
-                if !app.keys.down.contains(&Key::LControl) {
+                // if !app.keys.down.contains(&Key::LControl) {
                     let end = end.as_i32();
                     let sym = app.keys.down.contains(&Key::LShift);
                     self.draw_line(start, end, self.offset, sym);
                     self.mouse_pos = Some(end);
-                }
+                // }
             },
             MousePressed(button) => match button {
                 MouseButton::Left => self.mouse_pos = Some(app.mouse.position().as_i32()),
                 _ => ()
             },
             MouseReleased(button) => match button {
-                MouseButton::Left => if let Some(start) = self.mouse_pos {
-                    if app.keys.down.contains(&Key::LControl) {
-                        let end = app.mouse.position().as_i32();
-                        let sym = app.keys.down.contains(&Key::LShift);
-                        self.draw_line(start, end, self.offset, sym);
-                    }
+                MouseButton::Left => /*if let Some(start) = self.mouse_pos*/ {
+                    // if app.keys.down.contains(&Key::LControl) {
+                    //     let end = app.mouse.position().as_i32();
+                    //     let sym = app.keys.down.contains(&Key::LShift);
+                    //     self.draw_line(start, end, self.offset, sym);
+                    // }
                     self.mouse_pos = None;
                 },
                 _ => ()
@@ -107,8 +108,7 @@ impl Model {
     }
 
     pub fn view(&self, app: &App, draw: &Draw) {
-        let buf = ImageBuffer::from_raw(self.dims.0, self.dims.1, self.grid.render(3)).unwrap();
-        let view = Texture::from_image(app, &DynamicImage::ImageRgb8(buf));
+        let view = Texture::from_image(app, &self.grid_img());
         let mut desc = SamplerDescriptor::default();
         desc.mag_filter = FilterMode::Nearest;
         draw.scale(self.scale as f32)
@@ -116,8 +116,15 @@ impl Model {
             .texture(&view);
     }
 
-    fn toggle_stepping(&mut self) {
-        self.stepping = !self.stepping;
+    fn snapshot(&self, frame: u64) {
+        let img = self.grid_img();
+        img.save(format!("snapshots/{frame}.png")).unwrap();
+    }
+
+    fn grid_img(&self) -> DynamicImage {
+        let buf = self.grid.render(3);
+        let img = ImageBuffer::from_raw(self.dims.0, self.dims.1, buf).unwrap();
+        DynamicImage::ImageRgb8(img)
     }
 
 }
