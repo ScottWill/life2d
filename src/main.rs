@@ -28,8 +28,8 @@ pub struct Args {
     /// Pixel size of each cell in the grid
     #[arg(short, long, default_value_t = 2)]
     pub resolution: u32,
-    /// Ticks per Step, higher is slower
-    #[arg(short, long, default_value_t = 2)]
+    /// Speed factor, higher is slower
+    #[arg(short, long, default_value_t = 1)]
     pub speed: u8,
 }
 
@@ -70,7 +70,7 @@ fn event_fn(app: &App, model: &mut Model, event: WindowEvent) {
 fn update(app: &App, model: &mut Model, _: Update) {
     let now = Instant::now();
     app.main_window().set_title(&title!(model.title_meta()));
-    model.step(app.elapsed_frames());
+    model.step();
     if model.debug {
         println!("update: {:?}", now.elapsed());
     }

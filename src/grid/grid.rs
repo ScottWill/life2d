@@ -7,12 +7,12 @@ use super::rules::Rules;
 const RAND_DENOM: u32 = 6;
 
 pub struct Grid {
+    pub overlay: bool,
     pub rules: Rules,
     cell_ref: bool,
     cells: [Vec<bool>; 2],
     height: u32,
     width: u32,
-    overlay: bool,
 }
 
 impl Grid {
@@ -103,10 +103,6 @@ impl Grid {
         }
     }
 
-    pub fn toggle_overlay(&mut self) {
-        self.overlay = !self.overlay;
-    }
-
     pub fn step(&mut self) {
         
         self.cell_ref = !self.cell_ref;
@@ -174,13 +170,13 @@ fn mirror_pos((x, y): (i32, i32), h: i32, w: i32, sym: bool) -> Vec<usize> {
 #[macro_export]
 macro_rules! ix {
     ( $x:expr, $y:expr, $w:expr ) => {
-        ($y * $w + $x) as usize
+        (($y) * ($w) + ($x)) as usize
     }
 }
 
 #[macro_export]
 macro_rules! xy {
     ( $x:expr, $w:expr ) => {
-        ($x % $w, $x / $w)
+        (($x) % ($w), ($x) / ($w))
     }
 }
