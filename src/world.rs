@@ -8,6 +8,7 @@ pub struct Model {
     pub debug: bool,
     grid: Grid,
     mouse_pos: Option<IVec2>,
+    scale3: Vec3,
     scale: u32,
     dims: (u32, u32),
     stepping: bool,
@@ -17,14 +18,13 @@ pub struct Model {
 impl Model {
 
     pub fn new(width: u32, height: u32, scale: u32, debug: bool) -> Self {
-        assert!(height % scale == 0, "`scale` must be a divisor of `height`");
-        assert!(width % scale == 0, "`scale` must be a divisor of `width`");
         let dims = (width / scale, height / scale);
         let mut grid = Grid::new(dims.0, dims.1);
         grid.randomize();
         Model {
             offset: IVec2::new(width as i32, height as i32) / 2,
             mouse_pos: None,
+            scale3: Vec3::new(width as f32 / dims.0 as f32, height as f32 / dims.1 as f32, 0.0),
             stepping: true,
             debug,
             dims,
@@ -111,7 +111,7 @@ impl Model {
         let view = Texture::from_image(app, &self.grid_img());
         let mut desc = SamplerDescriptor::default();
         desc.mag_filter = FilterMode::Nearest;
-        draw.scale(self.scale as f32)
+        draw.scale_axes(self.scale3)
             .sampler(desc)
             .texture(&view);
     }

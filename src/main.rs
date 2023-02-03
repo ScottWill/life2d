@@ -25,7 +25,7 @@ struct Args {
     /// Window Height
     #[arg(short, long, default_value_t = 900)]
     height: u32,
-    /// Grid Scale, must be a divisor of both width and height
+    /// Grid Scale
     #[arg(short, long, default_value_t = 2)]
     scale: u32,
 }
