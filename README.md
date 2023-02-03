@@ -3,14 +3,18 @@
 - Draw with left mouse button
   - Hold LShift to draw a mirror copy of your line
 - Controls
-  - Backspace: clear the screen
-  - Enter: perform a single step
-  - Space: toggle running
-  - Comma and Period: cycle through different rule sets
-  - Slash: reset to default rule
+  - C: draw a cross
+  - G: draw a grid
+  - I: invert state
   - O: toggle overlay
   - R: randomize state
+  - S: save a snapshot
   - X: draw an X
-  - G: draw a grid
-  - C: draw a cross
-  - I: invert state
+  - Backspace: clear the screen
+  - Comma and Period: cycle through different rule sets
+  - Down: Slow speed
+  - Enter: perform a single step
+  - Slash: reset to default rule
+  - Shift + Slash: random rule
+  - Space: toggle running
+  - Up: Increase speed
