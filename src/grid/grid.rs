@@ -1,10 +1,7 @@
 use crate::{ix, xy};
 use line_drawing::Bresenham;
-use rand::{distributions::Bernoulli, prelude::Distribution};
 use rayon::prelude::*;
 use super::{rules::Rules, presets::{Presets, self}};
-
-const RAND_DENOM: u32 = 6;
 
 pub struct Grid {
     pub overlay: bool,
