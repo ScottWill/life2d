@@ -1,4 +1,4 @@
-use crate::{grid::grid::Grid, Args};
+use crate::{grid::{grid::Grid, presets::Presets}, Args};
 use nannou::{prelude::*, wgpu::*, image::*};
 
 const PAUSED: &'static str = "Paused";
@@ -23,7 +23,7 @@ impl Model {
     pub fn new(args: &Args) -> Self {
         let dims = (args.width / args.resolution, args.height / args.resolution);
         let mut grid = Grid::new(dims.0, dims.1);
-        grid.randomize();
+        grid.preset(Presets::Random);
         Model {
             debug: args.debug,
             mouse_pos: None,
@@ -41,14 +41,14 @@ impl Model {
     pub fn handle_event(&mut self, app: &App, event: nannou::event::WindowEvent) {
         match event {
             KeyPressed(key) => match key {
-                Key::C      => self.grid.preset_cross(),
-                Key::G      => self.grid.preset_grid(),
-                Key::I      => self.grid.invert(),
+                Key::C      => self.grid.preset(Presets::Cross),
+                Key::G      => self.grid.preset(Presets::Grid),
+                Key::I      => self.grid.preset(Presets::Invert),
                 Key::O      => self.grid.overlay = !self.grid.overlay,
-                Key::R      => self.grid.randomize(),
+                Key::R      => self.grid.preset(Presets::Random),
                 Key::S      => self.snapshot(app.main_window().elapsed_frames()),
-                Key::X      => self.grid.preset_eks(),
-                Key::Back   => self.grid.clear(),
+                Key::X      => self.grid.preset(Presets::X),
+                Key::Back   => self.grid.preset(Presets::Empty),
                 Key::Comma  => self.grid.rules.prev_rule(),
                 Key::Down   => self.set_speed(1),
                 Key::Left   => self.speed = 0,

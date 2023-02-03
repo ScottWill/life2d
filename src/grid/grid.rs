@@ -2,7 +2,7 @@ use crate::{ix, xy};
 use line_drawing::Bresenham;
 use rand::{distributions::Bernoulli, prelude::Distribution};
 use rayon::prelude::*;
-use super::rules::Rules;
+use super::{rules::Rules, presets::{Presets, self}};
 
 const RAND_DENOM: u32 = 6;
 
@@ -30,11 +30,6 @@ impl Grid {
         }
     }
 
-    pub fn clear(&mut self) {
-        let cells = &mut self.cells[self.cell_ref as usize];
-        cells.par_iter_mut().for_each(|c| *c = false);
-    }
-
     pub fn draw_line(&mut self, start: (i32, i32), end: (i32, i32), state: bool, sym: bool) {
         Bresenham::new(start, end)
             .collect::<Vec<(i32,i32)>>()
@@ -44,54 +39,9 @@ impl Grid {
             });
     }
 
-    pub fn invert(&mut self) {
+    pub fn preset(&mut self, preset: Presets) {
         let cells = &mut self.cells[self.cell_ref as usize];
-        cells.par_iter_mut()
-            .for_each(|c| *c = !*c);
-    }
-    
-    pub fn randomize(&mut self) {
-        let dist = Bernoulli::from_ratio(1, RAND_DENOM).unwrap();
-        let cells = &mut self.cells[self.cell_ref as usize];
-        cells.par_iter_mut()
-            .for_each(|c|
-                *c = (*c && self.overlay) || dist.sample(&mut rand::thread_rng())
-            );
-    }
-    
-    pub fn preset_grid(&mut self) {
-        let cells = &mut self.cells[self.cell_ref as usize];
-        cells.par_iter_mut()
-            .enumerate()
-            .for_each(|(i, c)| {
-                let (x, y) = xy![i as u32, self.width];
-                *c = (*c && self.overlay) || (x % 3 != 0 && y % 3 != 0);
-            });
-    }
-    
-    pub fn preset_cross(&mut self) {
-        let w = self.width / 2;
-        let h = self.height / 2;
-        let cells = &mut self.cells[self.cell_ref as usize];
-        cells.par_iter_mut()
-            .enumerate()
-            .for_each(|(i, c)| {
-                let (x, y) = xy![i as u32, self.width];
-                *c = (*c && self.overlay) || x == w || y == h;
-            });
-    }
-    
-    pub fn preset_eks(&mut self) {
-        let width = self.width;
-        let height = self.height;
-        let w = (width - height) / 2;
-        let cells = &mut self.cells[self.cell_ref as usize];
-        cells.par_iter_mut()
-            .enumerate()
-            .for_each(|(i, c)| {
-                let (x, y) = xy![i as u32, self.width];
-                *c = (*c && self.overlay) || x - w == y || x - w == height - y;
-            });
+        presets::get(preset).make(cells, self.width, self.height, self.overlay);
     }
     
     fn set_state(&mut self, pos: (i32, i32), state: bool, sym: bool) {
