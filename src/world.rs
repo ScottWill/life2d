@@ -1,4 +1,4 @@
-use crate::grid::grid::Grid;
+use crate::{grid::grid::Grid, Args};
 use nannou::{prelude::*, wgpu::*, image::*};
 
 const PAUSED: &'static str = "Paused";
@@ -6,30 +6,32 @@ const RUNNING: &'static str = "Running";
 
 pub struct Model {
     pub debug: bool,
+    dims: (u32, u32),
     grid: Grid,
     mouse_pos: Option<IVec2>,
-    scale3: Vec3,
-    scale: u32,
-    dims: (u32, u32),
-    stepping: bool,
     offset: IVec2,
+    scale: u32,
+    scale3: Vec3,
+    speed: u64,
+    stepping: bool,
 }
 
 impl Model {
 
-    pub fn new(width: u32, height: u32, scale: u32, debug: bool) -> Self {
-        let dims = (width / scale, height / scale);
+    pub fn new(args: &Args) -> Self {
+        let dims = (args.width / args.resolution, args.height / args.resolution);
         let mut grid = Grid::new(dims.0, dims.1);
         grid.randomize();
         Model {
-            offset: IVec2::new(width as i32, height as i32) / 2,
+            debug: args.debug,
             mouse_pos: None,
-            scale3: Vec3::new(width as f32 / dims.0 as f32, height as f32 / dims.1 as f32, 0.0),
+            offset: IVec2::new(args.width as i32, args.height as i32) / 2,
+            scale: args.resolution,
+            scale3: Vec3::new(args.width as f32 / dims.0 as f32, args.height as f32 / dims.1 as f32, 0.0),
+            speed: args.speed as u64,
             stepping: true,
-            debug,
             dims,
             grid,
-            scale,
         }
     }
 
@@ -87,8 +89,8 @@ impl Model {
         );
     }
 
-    pub fn step(&mut self) {
-        if self.stepping {
+    pub fn step(&mut self, ticks: u64) {
+        if self.stepping && ticks % self.speed == 0 {
             self.grid.step();
         }
     }

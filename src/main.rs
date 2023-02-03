@@ -12,22 +12,25 @@ const APP_NAME: &'static str = "2D Life";
 /// 2D Life simulation
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {
+pub struct Args {
     /// Output debug information
     #[arg(short, long, default_value_t = false)]
-    debug: bool,
+    pub debug: bool,
     /// Overrides both width/height if true
     #[arg(short, long, default_value_t = false)]
-    fullscreen: bool,
+    pub fullscreen: bool,
     /// Window Width
     #[arg(short, long, default_value_t = 1200)]
-    width: u32,
+    pub width: u32,
     /// Window Height
     #[arg(short, long, default_value_t = 900)]
-    height: u32,
-    /// Grid Scale
+    pub height: u32,
+    /// Pixel size of each cell in the grid
     #[arg(short, long, default_value_t = 2)]
-    scale: u32,
+    pub resolution: u32,
+    /// Ticks per Step, higher is slower
+    #[arg(short, long, default_value_t = 2)]
+    pub speed: u8,
 }
 
 fn main() {
@@ -42,8 +45,9 @@ fn model(app: &App) -> Model {
         .event(event_fn)
         .resizable(false);
     
-    let args = Args::parse();
-    assert!(args.scale > 0, "`scale` must be greater than zero");
+    let mut args = Args::parse();
+    assert!(args.resolution > 0, "`resolution` must be greater than zero");
+    assert!(args.speed > 0, "`speed` must be greater than zero");
 
     builder = if args.fullscreen {
         builder.fullscreen()
@@ -53,7 +57,10 @@ fn model(app: &App) -> Model {
         
     let id = builder.build().unwrap();
     let rect = app.window(id).unwrap().rect();
-    Model::new(rect.w() as u32, rect.h() as u32, args.scale, args.debug)
+    args.height = rect.h() as u32;
+    args.width = rect.w() as u32;
+
+    Model::new(&args)
 }
 
 fn event_fn(app: &App, model: &mut Model, event: WindowEvent) {
@@ -63,7 +70,7 @@ fn event_fn(app: &App, model: &mut Model, event: WindowEvent) {
 fn update(app: &App, model: &mut Model, _: Update) {
     let now = Instant::now();
     app.main_window().set_title(&title!(model.title_meta()));
-    model.step();
+    model.step(app.elapsed_frames());
     if model.debug {
         println!("update: {:?}", now.elapsed());
     }
