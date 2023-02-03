@@ -9,9 +9,9 @@ mod world;
 
 const APP_NAME: &'static str = "2D Life";
 
-// trait EventHandler {
-//     fn handle_event(&mut self, app: &App, event: &WindowEvent);
-// }
+trait EventHandler {
+    fn handle_event(&mut self, app: &App, event: &WindowEvent);
+}
 
 fn main() {
     nannou::app(model)
@@ -44,7 +44,7 @@ fn model(app: &App) -> Model {
 }
 
 fn event_fn(app: &App, model: &mut Model, event: WindowEvent) {
-    model.handle_event(app, event);
+    model.handle_event(app, &event);
 }
 
 fn update(app: &App, model: &mut Model, _: Update) {

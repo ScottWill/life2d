@@ -1,5 +1,6 @@
-use crate::{ix, xy};
+use crate::{ix, xy, EventHandler};
 use line_drawing::Bresenham;
+use nannou::prelude::{WindowEvent::KeyPressed, Key};
 use rayon::prelude::*;
 use super::{rules::Rules, presets::{Presets, self}};
 
@@ -17,14 +18,16 @@ impl Grid {
     pub fn new(width: u32, height: u32) -> Self {
         let size = (width * height) as usize;
         let cells = vec![false; size];
-        Self {
+        let mut grid = Self {
             cell_ref: false,
             cells: [cells.clone(), cells],
             overlay: false,
             rules: Rules::default(),
             height,
             width,
-        }
+        };
+        grid.preset(Presets::Random);
+        grid
     }
 
     pub fn draw_line(&mut self, start: (i32, i32), end: (i32, i32), state: bool, sym: bool) {
@@ -36,7 +39,7 @@ impl Grid {
             });
     }
 
-    pub fn preset(&mut self, preset: Presets) {
+    fn preset(&mut self, preset: Presets) {
         let cells = &mut self.cells[self.cell_ref as usize];
         presets::get(preset).make(cells, self.width, self.height, self.overlay);
     }
@@ -82,6 +85,30 @@ impl Grid {
         buf
     }
 
+}
+
+impl EventHandler for Grid {
+    fn handle_event(&mut self, app: &nannou::App, event: &nannou::prelude::WindowEvent) {
+        match event {
+            KeyPressed(key) => match key {
+                Key::C      => self.preset(Presets::Cross),
+                Key::G      => self.preset(Presets::Grid),
+                Key::I      => self.preset(Presets::Invert),
+                Key::O      => self.overlay = !self.overlay,
+                Key::R      => self.preset(Presets::Random),
+                Key::X      => self.preset(Presets::X),
+                Key::Back   => self.preset(Presets::Empty),
+                Key::Comma  => self.rules.prev_rule(),
+                Key::Period => self.rules.next_rule(),
+                Key::Slash  => match app.keys.mods.shift() {
+                    true  => self.rules.random_rule(),
+                    false => self.rules.reset_rules(),
+                },
+                _ => ()
+            },
+            _ => (),
+        };
+    }
 }
 
 fn count(cells: &Vec<bool>, x: u32, y: u32, w: u32, h: u32) -> usize {

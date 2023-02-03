@@ -1,3 +1,3 @@
 pub mod grid;
-pub mod presets;
+mod presets;
 mod rules;

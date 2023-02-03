@@ -1,4 +1,4 @@
-use crate::{grid::{grid::Grid, presets::Presets}, Args};
+use crate::{grid::{grid::Grid}, Args, EventHandler};
 use nannou::{prelude::*, wgpu::*, image::*};
 
 const PAUSED: &'static str = "Paused";
@@ -22,10 +22,9 @@ impl Model {
 
     pub fn new(args: &Args) -> Self {
         let dims = (args.width / args.resolution, args.height / args.resolution);
-        let mut grid = Grid::new(dims.0, dims.1);
-        grid.preset(Presets::Random);
         Model {
             debug: args.debug,
+            grid: Grid::new(dims.0, dims.1),
             mouse_pos: None,
             offset: IVec2::new(args.width as i32, args.height as i32) / 2,
             scale: args.resolution,
@@ -34,51 +33,7 @@ impl Model {
             stepping: true,
             ticks: 0,
             dims,
-            grid,
         }
-    }
-
-    pub fn handle_event(&mut self, app: &App, event: nannou::event::WindowEvent) {
-        match event {
-            KeyPressed(key) => match key {
-                Key::C      => self.grid.preset(Presets::Cross),
-                Key::G      => self.grid.preset(Presets::Grid),
-                Key::I      => self.grid.preset(Presets::Invert),
-                Key::O      => self.grid.overlay = !self.grid.overlay,
-                Key::R      => self.grid.preset(Presets::Random),
-                Key::S      => self.snapshot(app.main_window().elapsed_frames()),
-                Key::X      => self.grid.preset(Presets::X),
-                Key::Back   => self.grid.preset(Presets::Empty),
-                Key::Comma  => self.grid.rules.prev_rule(),
-                Key::Down   => self.set_speed(1),
-                Key::Left   => self.speed = 0,
-                Key::Return => self.step_once(),
-                Key::Right  => self.speed = SPEEDS.len() - 1,
-                Key::Period => self.grid.rules.next_rule(),
-                Key::Slash  => match app.keys.mods.shift() {
-                    true  => self.grid.rules.random_rule(),
-                    false => self.grid.rules.reset_rules(),
-                },
-                Key::Space  => self.stepping = !self.stepping,
-                Key::Up     => self.set_speed(-1),
-                _ => ()
-            },
-            MouseMoved(end) => if let Some(start) = self.mouse_pos {
-                let end = end.as_i32();
-                let sym = app.keys.down.contains(&Key::LShift);
-                self.draw_line(start, end, self.offset, sym);
-                self.mouse_pos = Some(end);
-            },
-            MousePressed(button) => match button {
-                MouseButton::Left => self.mouse_pos = Some(app.mouse.position().as_i32()),
-                _ => ()
-            },
-            MouseReleased(button) => match button {
-                MouseButton::Left => self.mouse_pos = None,
-                _ => ()
-            },
-            _ => (),
-        };
     }
 
     fn draw_line(&mut self, start: IVec2, end: IVec2, offset: IVec2, sym: bool) {
@@ -135,6 +90,38 @@ impl Model {
         DynamicImage::ImageRgb8(img)
     }
 
+}
+
+impl EventHandler for Model {
+    fn handle_event(&mut self, app: &App, event: &WindowEvent) {
+        match event {
+            KeyPressed(key) => match key {
+                Key::S      => self.snapshot(app.main_window().elapsed_frames()),
+                Key::Down   => self.set_speed(1),
+                Key::Left   => self.speed = 0,
+                Key::Return => self.step_once(),
+                Key::Right  => self.speed = SPEEDS.len() - 1,
+                Key::Space  => self.stepping = !self.stepping,
+                Key::Up     => self.set_speed(-1),
+                _ =>           self.grid.handle_event(app, event),
+            },
+            MouseMoved(end) => if let Some(start) = self.mouse_pos {
+                let end = end.as_i32();
+                let sym = app.keys.down.contains(&Key::LShift);
+                self.draw_line(start, end, self.offset, sym);
+                self.mouse_pos = Some(end);
+            },
+            MousePressed(button) => match button {
+                MouseButton::Left => self.mouse_pos = Some(app.mouse.position().as_i32()),
+                _ => ()
+            },
+            MouseReleased(button) => match button {
+                MouseButton::Left => self.mouse_pos = None,
+                _ => ()
+            },
+            _ => (),
+        };
+    }
 }
 
 #[inline(always)]
