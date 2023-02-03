@@ -43,6 +43,8 @@ fn model(app: &App) -> Model {
         .resizable(false);
     
     let args = Args::parse();
+    assert!(args.scale > 0, "`scale` must be greater than zero");
+
     builder = if args.fullscreen {
         builder.fullscreen()
     } else {
