@@ -47,10 +47,12 @@ impl Model {
                 Key::X      => self.grid.preset_eks(),
                 Key::Back   => self.grid.clear(),
                 Key::Comma  => self.grid.rules.prev_rule(),
+                Key::Down   => self.set_speed(1),
                 Key::Return => self.step_once(),
                 Key::Period => self.grid.rules.next_rule(),
                 Key::Slash  => self.grid.rules.reset_rules(),
                 Key::Space  => self.stepping = !self.stepping,
+                Key::Up     => self.set_speed(-1),
                 _ => ()
             },
             MouseMoved(end) => if let Some(start) = self.mouse_pos {
@@ -87,6 +89,10 @@ impl Model {
             true,
             sym
         );
+    }
+
+    fn set_speed(&mut self, inc: i64) {
+        self.speed = (self.speed as i64 + inc).clamp(1, 255) as u64;
     }
 
     pub fn step(&mut self, ticks: u64) {
