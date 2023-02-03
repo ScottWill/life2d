@@ -41,7 +41,7 @@ impl Grid {
 
     fn preset(&mut self, preset: Presets) {
         let cells = &mut self.cells[self.cell_ref as usize];
-        presets::get(preset).make(cells, self.width, self.height, self.overlay);
+        presets::get(preset).make(cells, self.width, self.overlay);
     }
     
     fn set_state(&mut self, pos: (i32, i32), state: bool, sym: bool) {

@@ -23,63 +23,65 @@ pub enum Presets {
 }
 
 pub trait Preset {
-    fn make(&self, buff: &mut Vec<bool>, w: u32, h: u32, or: bool);
+    fn make(&self, buff: &mut Vec<bool>, width: u32, overlay: bool);
 }
 
 struct Empty;
 impl Preset for Empty {
-    fn make(&self, buff: &mut Vec<bool>, _: u32, _: u32, _: bool) {
+    fn make(&self, buff: &mut Vec<bool>, _: u32, _: bool) {
         buff.par_iter_mut().for_each(|c| *c = false);
     }
 }
 
 struct Invert;
 impl Preset for Invert {
-    fn make(&self, buff: &mut Vec<bool>, _: u32, _: u32, _: bool) {
+    fn make(&self, buff: &mut Vec<bool>, _: u32, _: bool) {
         buff.par_iter_mut().for_each(|c| *c = !*c);
     }
 }
 
 struct Random;
 impl Preset for Random {
-    fn make(&self, buff: &mut Vec<bool>, _: u32, _: u32, or: bool) {
+    fn make(&self, buff: &mut Vec<bool>, _: u32, overlay: bool) {
         let dist = Bernoulli::from_ratio(1, 6).unwrap();
         buff.par_iter_mut()
             .for_each(|c|
-                *c = (*c && or) || dist.sample(&mut rand::thread_rng())
+                *c = (*c && overlay) || dist.sample(&mut rand::thread_rng())
             );
     }
 }
 
 struct Grid;
 impl Preset for Grid {
-    fn make(&self, buff: &mut Vec<bool>, w: u32, _: u32, or: bool) {
+    fn make(&self, buff: &mut Vec<bool>, w: u32, overlay: bool) {
         buff.par_iter_mut()
             .enumerate()
             .for_each(|(i, c)| {
                 let (x, y) = xy![i as u32, w];
-                *c = (*c && or) || (x % 3 != 0 && y % 3 != 0);
+                *c = (*c && overlay) || (x % 3 != 0 && y % 3 != 0);
             });
     }
 }
 
 struct Cross;
 impl Preset for Cross {
-    fn make(&self, buff: &mut Vec<bool>, w: u32, h: u32, or: bool) {
+    fn make(&self, buff: &mut Vec<bool>, w: u32, overlay: bool) {
+        let h = buff.len() as u32 / w;
         let w2 = w / 2;
         let h2 = h / 2;
         buff.par_iter_mut()
             .enumerate()
             .for_each(|(i, c)| {
                 let (x, y) = xy![i as u32, w];
-                *c = (*c && or) || x == w2 || y == h2;
+                *c = (*c && overlay) || x == w2 || y == h2;
             });
     }
 }
 
 struct X;
 impl Preset for X {
-    fn make(&self, buff: &mut Vec<bool>, w: u32, h: u32, or: bool) {
+    fn make(&self, buff: &mut Vec<bool>, w: u32, overlay: bool) {
+        let h = buff.len() as u32 / w;
         let width = w;
         let height = h;
         let w = (width - height) / 2;
@@ -87,7 +89,7 @@ impl Preset for X {
             .enumerate()
             .for_each(|(i, c)| {
                 let (x, y) = xy![i as u32, width];
-                *c = (*c && or) || x - w == y || x - w == height - y;
+                *c = (*c && overlay) || x - w == y || x - w == height - y;
             });
     }
 }
