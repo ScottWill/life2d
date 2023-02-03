@@ -1,3 +1,5 @@
+use crate::EventHandler;
+use nannou::prelude::*;
 use rand::random;
 
 
@@ -115,4 +117,21 @@ impl Rules {
         self.rule = value % RULES.len();
     }
     
+}
+
+impl EventHandler for Rules {
+    fn handle_event(&mut self, app: &App, event: &WindowEvent) {
+        match event {
+            KeyPressed(key) => match key {
+                Key::Comma  => self.prev_rule(),
+                Key::Period => self.next_rule(),
+                Key::Slash  => match app.keys.mods.shift() {
+                    true  => self.random_rule(),
+                    false => self.reset_rules(),
+                },
+                _ => (),
+            },
+            _ => (),
+        };
+    }
 }

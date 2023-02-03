@@ -1,6 +1,6 @@
 use crate::{ix, xy, EventHandler};
 use line_drawing::Bresenham;
-use nannou::prelude::{WindowEvent::KeyPressed, Key};
+use nannou::prelude::*;
 use rayon::prelude::*;
 use super::{rules::Rules, presets::{Presets, self}};
 
@@ -88,7 +88,7 @@ impl Grid {
 }
 
 impl EventHandler for Grid {
-    fn handle_event(&mut self, app: &nannou::App, event: &nannou::prelude::WindowEvent) {
+    fn handle_event(&mut self, app: &App, event: &WindowEvent) {
         match event {
             KeyPressed(key) => match key {
                 Key::C      => self.preset(Presets::Cross),
@@ -98,13 +98,7 @@ impl EventHandler for Grid {
                 Key::R      => self.preset(Presets::Random),
                 Key::X      => self.preset(Presets::X),
                 Key::Back   => self.preset(Presets::Empty),
-                Key::Comma  => self.rules.prev_rule(),
-                Key::Period => self.rules.next_rule(),
-                Key::Slash  => match app.keys.mods.shift() {
-                    true  => self.rules.random_rule(),
-                    false => self.rules.reset_rules(),
-                },
-                _ => ()
+                _           => self.rules.handle_event(app, event),
             },
             _ => (),
         };
